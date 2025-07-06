@@ -1,0 +1,222 @@
+
+ <!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mario Prank</title>
+  <style>
+    #loadingBarContainer {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 30px;
+      background: #222;
+      color: #0f0;
+      font-family: monospace;
+      font-size: 14px;
+      display: flex;
+      align-items: center;
+      padding-left: 10px;
+      z-index: 10000;
+    }
+    #loadingProgress {
+      position: absolute;
+      top: 30px; left: 0;
+      height: 4px;
+      background: #0f0;
+      width: 0%;
+      transition: width 0.5s linear;
+    }
+    body {
+      background: #fff;
+      font-family: sans-serif;
+      text-align: center;
+      padding-top: 50px;
+    }
+  </style>
+</head>
+<body>
+
+<div id="loadingBarContainer">
+  <span id="loadingText">🕵️‍♂️ Stealing your private information...</span>
+</div>
+<div id="loadingProgress"></div>
+
+<script>
+  const notificationMessages = [
+    "Mario will steal your liver in 3 days!",
+    "Luigi ate your cookies!",
+    "Bowser is watching you...",
+    "Princess Peach needs your help!",
+    "Yoshi hid your keys!",
+    "Mario’s coming for you tonight!",
+    "Watch out! Goombas inbound!",
+    "Power-up mushroom missing!",
+    "Your computer is infected with 1,000 viruses!",
+    "System error: Clown invasion detected!",
+    "Warning! Keyboard stuck on CAPS LOCK!",
+    "You clicked too many times!",
+    "Virus detected! Just kidding 😜",
+    "Keep calm and restart later.",
+    "Your pet goldfish is watching you.",
+    "Aliens abducted your files.",
+    "Time to dance! 💃🕺",
+    "404: Motivation not found.",
+    "Error 69: Nice."
+  ];
+
+  let notifIndex = 0;
+  let popupTimer = null;
+  let prankRunning = true;
+  let popups = [];
+
+  function openNotificationPopup(message) {
+    if (!prankRunning) return;
+
+    const width = 300;
+    const height = 150;
+    const x = Math.floor(Math.random() * (screen.width - width));
+    const y = Math.floor(Math.random() * (screen.height - height));
+
+    const notifWindow = window.open('', '', `width=${width},height=${height},left=${x},top=${y},resizable=no,scrollbars=no`);
+    if (!notifWindow) return;
+
+    popups.push(notifWindow);
+
+    notifWindow.document.write(`
+      <html>
+        <head>
+          <title>🚨 Warning!</title>
+          <style>
+            body {
+              margin: 0;
+              background: black;
+              color: #0f0;
+              font-family: monospace;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              height: 100vh;
+              text-align: center;
+              user-select: none;
+              position: relative;
+            }
+            button {
+              position: absolute;
+              bottom: 2px;
+              left: 2px;
+              background: #0f0;
+              border: none;
+              color: black;
+              font-weight: bold;
+              cursor: pointer;
+              padding: 0;
+              font-size: 8px;
+              width: 12px;
+              height: 12px;
+              line-height: 10px;
+              opacity: 0.6;
+              user-select: none;
+            }
+            button:hover {
+              opacity: 1;
+            }
+          </style>
+        </head>
+        <body>
+          <div>${message}</div>
+          <button onclick="window.close()" title="Close window">X</button>
+          <script>
+            window.onunload = () => {
+              if (window.opener && typeof window.opener.spawnNextPopup === 'function') {
+                window.opener.spawnNextPopup();
+              }
+            };
+          <\/script>
+        </body>
+      </html>
+    `);
+    notifWindow.document.close();
+  }
+
+  function spawnNextPopup() {
+    if (!prankRunning) return;
+    const msg = notificationMessages[notifIndex];
+    openNotificationPopup(msg);
+    notifIndex = (notifIndex + 1) % notificationMessages.length;
+  }
+
+  // Start opening popups
+  let count = 0;
+  const maxPopups = 10;
+
+  popupTimer = setInterval(() => {
+    if (!prankRunning || count >= maxPopups) {
+      clearInterval(popupTimer);
+      return;
+    }
+    spawnNextPopup();
+    count++;
+  }, 1000);
+
+  // Loading bar
+  const progress = document.getElementById('loadingProgress');
+  const loadingText = document.getElementById('loadingText');
+  let progressVal = 0;
+
+  const progressInterval = setInterval(() => {
+    if (!prankRunning) {
+      clearInterval(progressInterval);
+      return;
+    }
+    if (progressVal >= 100) {
+      clearInterval(progressInterval);
+      loadingText.textContent = '💀 All your data now belongs to us.';
+      loadingText.style.color = 'red';
+      return;
+    }
+    progressVal += 100 / maxPopups;
+    progress.style.width = progressVal + '%';
+  }, 1000);
+
+  // 🛑 Emergency Kill Switch: Shift + Esc + X
+  let keys = { Shift: false, Escape: false, X: false };
+
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'Shift') keys.Shift = true;
+    if (e.key === 'Escape') keys.Escape = true;
+    if (e.key.toUpperCase() === 'X') keys.X = true;
+
+    if (keys.Shift && keys.Escape && keys.X) {
+      killPrank();
+    }
+  });
+
+  window.addEventListener('keyup', (e) => {
+    if (e.key === 'Shift') keys.Shift = false;
+    if (e.key === 'Escape') keys.Escape = false;
+    if (e.key.toUpperCase() === 'X') keys.X = false;
+  });
+
+  function killPrank() {
+    prankRunning = false;
+    clearInterval(popupTimer);
+    loadingText.textContent = '🛑 Prank terminated by user.';
+    loadingText.style.color = 'yellow';
+    progress.style.background = 'orange';
+    progress.style.width = '100%';
+    for (let win of popups) {
+      try { win.close(); } catch {}
+    }
+    popups = [];
+  }
+
+  // Expose function to child popups
+  window.spawnNextPopup = spawnNextPopup;
+  window.notificationMessages = notificationMessages;
+  window.notifIndex = notifIndex;
+</script>
+
+</body>
+</html>
